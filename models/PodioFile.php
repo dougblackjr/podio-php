@@ -3,6 +3,7 @@
  * @see https://developers.podio.com/doc/files
  */
 class PodioFile extends PodioObject {
+
   public function __construct($attributes = array()) {
     $this->property('file_id', 'integer', array('id' => true));
     $this->property('link', 'string');
@@ -24,16 +25,16 @@ class PodioFile extends PodioObject {
     $this->init($attributes);
   }
 
-  private function get_download_link($size = null) {
-    return $size ? ($this->link . '/' . $size) : $this->link;
+  private static function get_download_link($file_id, $size = null) {
+    return $size ? (self::$link . '/' . $size) : self::$link;
   }
 
   /**
    * Returns the raw bytes of a file. Beware: This is not a static method.
    * It can only be used after you have a PodioFile object.
    */
-  public function get_raw($size = null) {
-    return Podio::get($this->get_download_link($size), array(), array('file_download' => true))->body;
+  public static function get_raw($file_id, $size = null) {
+    return Podio::get("/file/{$file_id}/raw")->body;
   }
 
   /**
@@ -43,8 +44,8 @@ class PodioFile extends PodioObject {
    * In contrast to get_raw this method does use minimal memory (the result is stored in php://temp)
    * @return resource pointing at start of body (use fseek($resource, 0) to get headers as well)
    */
-  public function get_raw_as_resource($size = null) {
-    return Podio::get($this->get_download_link($size), array(), array('file_download' => true, 'return_raw_as_resource_only' => true));
+  public static function get_raw_as_resource($file_id, $size = null) {
+    return Podio::get($this->get_download_link($file_id, $size), array(), array('file_download' => true, 'return_raw_as_resource_only' => true));
   }
 
   /**
